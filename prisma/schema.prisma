@@ -1,0 +1,60 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Sender{
+  id String @id() @default(auto()) @map("_id") @db.ObjectId
+  name String
+  email String @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  emails Email[]
+}
+
+model Recipient{
+  id String @id() @default(auto()) @map("_id") @db.ObjectId
+  name String
+  email String @unique
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  emails Email[] @relation(fields: [emails_ids], references: [id])
+  emails_ids String[] @db.ObjectId
+}
+
+model Email{
+  id String @id() @default(auto()) @map("_id") @db.ObjectId
+  subject String
+  message String
+  sender Sender @relation(fields: [sender_id], references: [id])
+  sender_id String @db.ObjectId
+  send_at DateTime
+  sended_at DateTime @default(now())
+  recipients Recipient[] @relation(fields: [recipients_ids], references: [id])
+  recipients_ids String[] @db.ObjectId
+  template Template @relation(fields: [template_id], references: [id])
+  template_id String @db.ObjectId
+  
+}
+
+model Template{
+  id String @id() @default(auto()) @map("_id") @db.ObjectId
+  name String
+  html String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  emails Email[]
+}
